@@ -15,3 +15,6 @@ export const getSimiSongs = (id, option) =>
 
 // 歌词
 export const getLyric = id => request.get(`/lyric?id=${id}`)
+
+// 获取音乐url by other
+export const getSongUrlByOther = id => request.get(`/getByOther?id=${id}`)

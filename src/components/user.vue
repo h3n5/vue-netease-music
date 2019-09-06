@@ -1,113 +1,118 @@
 <template>
   <div class="user">
     <!-- 登录前 -->
-    <div
-      @click="onOpenModal"
-      class="login-trigger"
-      v-if="!isLogin"
-    >
+    <div @click="onOpenModal" class="login-trigger" v-if="!isLogin">
       <i class="user-icon iconfont icon-yonghu" />
       <p class="user-name">未登录</p>
     </div>
     <!-- 登录后 -->
-    <div
-      @click="onLogout"
-      class="logined-user"
-      v-else
-    >
-      <img
-        :src="$utils.genImgUrl(user.avatarUrl, 80)"
-        class="avatar"
-      />
+    <div @click="onLogout" class="logined-user" v-else>
+      <img :src="$utils.genImgUrl(user.avatarUrl, 80)" class="avatar" />
       <p class="user-name">{{user.nickname}}</p>
     </div>
 
     <!-- 登录框 -->
-    <el-dialog
-      :modal="false"
-      :visible.sync="visible"
-      :width="$utils.toRem(320)"
-    >
+    <el-dialog :modal="false" :visible.sync="visible" :width="$utils.toRem(320)">
       <p slot="title">登录</p>
+
       <div class="login-body">
-        <el-input
-          class="input"
-          placeholder="请输入您的网易云uid"
-          v-model="uid"
-        />
-        <div class="login-help">
+        <el-tabs stretch v-model="loginType">
+          <el-tab-pane label="邮箱登录" name="email">
+            <el-input class="input" placeholder="请输入邮箱" v-model="formEmail.email" />
+            <el-input
+              class="input"
+              type="password"
+              show-password
+              placeholder="请输入密码"
+              v-model="formEmail.password"
+            />
+          </el-tab-pane>
+          <el-tab-pane label="手机登录" name="phone">
+            <el-input class="input" placeholder="请输入手机" v-model="formEmail.phone" />
+            <el-input
+              class="input"
+              type="password"
+              show-password
+              placeholder="请输入密码"
+              v-model="formEmail.password"
+            />
+          </el-tab-pane>
+        </el-tabs>
+
+        <!-- <div class="login-help">
           <p class="help">
             1、请
-            <a
-              href="http://music.163.com"
-              target="_blank"
-            >点我(http://music.163.com)</a>打开网易云音乐官网
+            <a href="http://music.163.com" target="_blank">点我(http://music.163.com)</a>打开网易云音乐官网
           </p>
           <p class="help">2、点击页面右上角的“登录”</p>
           <p class="help">3、点击您的头像，进入我的主页</p>
           <p class="help">4、复制浏览器地址栏 /user/home?id= 后面的数字（网易云 UID）</p>
-        </div>
+        </div>-->
       </div>
-      <span
-        class="dialog-footer"
-        slot="footer"
-      >
-        <el-button
-          :loading="loading"
-          @click="onLogin(uid)"
-          class="login-btn"
-          type="primary"
-        >登 录</el-button>
+      <span class="dialog-footer" slot="footer">
+        <el-button :loading="loading" @click="onLogin" class="login-btn" type="primary">登 录</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import storage from "good-storage"
-import { UID_KEY, isDef } from "@/utils"
-import { confirm } from "@/base/confirm"
+import storage from "good-storage";
+import { UID_KEY, isDef } from "@/utils";
+import { confirm } from "@/base/confirm";
 import {
   mapActions as mapUserActions,
   mapState as mapUserState,
   mapGetters as mapUserGetters
-} from "@/store/helper/user"
+} from "@/store/helper/user";
 
 export default {
   // 自动登录
   created() {
-    const uid = storage.get(UID_KEY)
-    if (isDef(uid)) {
-      this.onLogin(uid)
-    }
+    // const uid = storage.get(UID_KEY);
+    // if (isDef(uid)) {
+    //   this.onLogin(uid);
+    // }
   },
   data() {
     return {
       visible: false,
       loading: false,
-      uid: ""
-    }
+      loginType: "email",
+      formEmail: {
+        email: "",
+        password: ""
+      },
+      formPhone: {
+        phone: "",
+        password: ""
+      }
+    };
   },
   methods: {
     onOpenModal() {
-      this.visible = true
+      this.visible = true;
     },
     onCloseModal() {
-      this.visible = false
+      this.visible = false;
     },
-    async onLogin(uid) {
-      this.loading = true
-      const success = await this.login(uid).finally(() => {
-        this.loading = false
-      })
+    async onLogin() {
+      this.loading = true;
+      let data = this.loginType === "email" ? this.formEmail : this.formPhone;
+      const success = await this.login({
+        data,
+        loginType: this.loginType
+      }).finally(() => {
+        this.loading = false;
+      });
       if (success) {
-        this.onCloseModal()
+        this.onCloseModal();
       }
     },
     onLogout() {
       confirm("确定要注销吗？", () => {
-        this.logout()
-      })
+        this.logout();
+      });
     },
     ...mapUserActions(["login", "logout"])
   },
@@ -116,7 +121,7 @@ export default {
     ...mapUserGetters(["isLogin"])
   },
   components: {}
-}
+};
 </script>
 
 <style lang="scss" scoped>

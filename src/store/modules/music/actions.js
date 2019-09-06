@@ -1,6 +1,6 @@
-import { getSongUrl } from "@/api"
-import storage from 'good-storage'
-import { PLAY_HISTORY_KEY, notify, getSongImg } from '@/utils'
+import { getSongUrl, getSongUrlByOther } from "@/api"
+import storage from "good-storage"
+import { PLAY_HISTORY_KEY, notify, getSongImg } from "@/utils"
 
 export default {
   // 整合歌曲信息 并且开始播放
@@ -14,8 +14,22 @@ export default {
         song.img = await getSongImg(song.id, song.albumId)
       }
     }
-    commit('setCurrentSong', song)
-    commit('setPlayingState', true)
+    // 检查是否能播放
+    const canPlay = await checkCanPlay(song.id)
+    if (!canPlay) {
+      let res = await getSongUrlByOther(song.id)
+      // 替换其他音源
+      if (res.url) {
+        song.url = res.url
+      }else{
+        // 清空当前歌曲
+        notify(`${song.name}播放失败`)
+        dispatch("clearCurrentSong")
+        return
+      }
+    }
+    commit("setCurrentSong", song)
+    commit("setPlayingState", true)
     // 历史记录
     const { playHistory } = state
     const playHistoryCopy = playHistory.slice()
@@ -25,28 +39,21 @@ export default {
       playHistoryCopy.splice(findedIndex, 1)
     }
     playHistoryCopy.unshift(song)
-    commit('setPlayHistory', playHistoryCopy)
+    commit("setPlayHistory", playHistoryCopy)
     storage.set(PLAY_HISTORY_KEY, playHistoryCopy)
-    // 检查是否能播放
-    const canPlay = await checkCanPlay(song.id)
-    if (!canPlay) {
-      notify(`${song.name}播放失败`)
-      // 清空当前歌曲
-      dispatch('clearCurrentSong')
-    }
   },
   clearCurrentSong({ commit }) {
-    commit('setCurrentSong', {})
-    commit('setPlayingState', false)
-    commit('setCurrentTime', 0)
+    commit("setCurrentSong", {})
+    commit("setPlayingState", false)
+    commit("setCurrentTime", 0)
   },
   clearPlaylist({ commit, dispatch }) {
-    commit('setPlaylist', [])
-    dispatch('clearCurrentSong')
+    commit("setPlaylist", [])
+    dispatch("clearCurrentSong")
   },
   clearHistory({ commit }) {
     const history = []
-    commit('setPlayHistory', history)
+    commit("setPlayHistory", history)
     storage.set(PLAY_HISTORY_KEY, history)
   },
   addToPlaylist({ commit, state }, song) {
@@ -54,7 +61,7 @@ export default {
     const copy = playlist.slice()
     if (!copy.find(({ id }) => id === song.id)) {
       copy.unshift(song)
-      commit('setPlaylist', copy)
+      commit("setPlaylist", copy)
     }
   }
 }

@@ -1,19 +1,35 @@
-
-import { Input, Dialog, Button, Loading, Carousel, CarouselItem, Table, TableColumn, Popover, Pagination } from 'element-ui'
-import * as utils from './index'
+import {
+  Input,
+  Dialog,
+  Button,
+  Loading,
+  Carousel,
+  CarouselItem,
+  Table,
+  TableColumn,
+  Popover,
+  Pagination,
+  Tabs,
+  TabPane
+} from "element-ui"
+import * as utils from "./index"
 
 // 全局图片错误处理
-window.addEventListener('error', function (e) {
-  const target = e.target // 当前dom节点
-  if (target) {
-    const { tagName } = target
-    if (tagName && tagName.toUpperCase() === 'IMG') {
-      target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+window.addEventListener(
+  "error",
+  function(e) {
+    const target = e.target // 当前dom节点
+    if (target) {
+      const { tagName } = target
+      if (tagName && tagName.toUpperCase() === "IMG") {
+        target.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      }
     }
-  }
-}, true)
+  },
+  true
+)
 
-const requireComponent = require.context('@/base', true, /[a-z0-9]+\.(jsx?|vue)$/i)
+const requireComponent = require.context("@/base", true, /[a-z0-9]+\.(jsx?|vue)$/i)
 export default {
   install(Vue) {
     // 批量注册base组件
@@ -25,7 +41,7 @@ export default {
       }
     })
 
-    Vue.prototype.$ELEMENT = { size: 'small' };
+    Vue.prototype.$ELEMENT = { size: "small" }
     Vue.prototype.$utils = utils
 
     Vue.use(Input)
@@ -38,5 +54,7 @@ export default {
     Vue.use(Loading)
     Vue.use(Dialog)
     Vue.use(Button)
+    Vue.use(Tabs)
+    Vue.use(TabPane)
   }
 }

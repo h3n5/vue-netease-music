@@ -119,12 +119,12 @@
         />
       </div>
       <!-- github -->
-      <Icon
+      <!-- <Icon
         :size="20"
         @click="goGitHub"
         class="mode-item"
         type="github"
-      />
+      /> -->
     </div>
     <div class="progress-bar-wrap">
       <ProgressBar
